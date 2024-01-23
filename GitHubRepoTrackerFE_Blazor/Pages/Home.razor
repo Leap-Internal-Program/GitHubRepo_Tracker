@@ -1,5 +1,6 @@
 ﻿@using GitHubRepoTrackerFE_Blazor.Interfaces
 @using GitHubRepoTrackerFE_Blazor.Models
+@using System.Linq
 @page "/"
 @inject IRepoService reposervice
 @inject ILanguageService languageservice
@@ -9,27 +10,31 @@
 <PageTitle>Home</PageTitle>
 <Header />
 
-@if (repositories is not null)
+@if (repositories is not null && topics is not null && languages is not null)
 {
-    <div class="row form-group">
-        <div class="col-md-8"></div>
-        <div class="col-md-2">
-            <select>
+    <div class="filters text-right">
+        <label>Filter by Language:</label>
+        <select @onchange="FilterByLanguage">
+                <option value="Select" selected disabled="disabled">Choose Language</option>
                 @foreach (var language in languages)
                 {
+                   
                     <option value="@language.languageName">@language.languageName</option>
                 }
             </select>
-        </div>
-        <div class="col-md-2">
-            <select>
+   
+        <label>Filter by Topics:</label>
+
+        <select @onchange="FilterByTopic">
+                <option value="Select" selected disabled="disabled">Choose Topic</option>
+
                 @foreach (var topic in topics)
                 {
                     <option value="@topic.topicName">@topic.topicName</option>
                 }
-            </select>
-        </div>
+        </select>
     </div>
+    
     <table class="table">
         <thead>
             <tr>
@@ -72,16 +77,10 @@
     
 else
 {
-        <p>Loading repositories...</p>
+        <p>Loading data...</p>
 }
 
-    @*<div class="pagination">
-        @for (var i = 1; i <= totalPages; i++)
-        {
-            <button class="@(currentPage == i ? "active" : "")" @onclick="ChangePage(i)">@i</button>
-        }
-    </div>
-    *@
+    
 
 
 @code
@@ -89,6 +88,10 @@ else
     private List<Repository> repositories { get; set; }
     private List<Language> languages { get; set; }
     private List<Topic> topics { get; set; }
+
+    string selectedLanguage = "";
+    string selectedTopic = "";
+
 }
 
 @functions {
@@ -98,8 +101,30 @@ else
         languages = await languageservice.GetAllLanguages();
         topics = await topicservice.GetAllTopics();
 
-   
     
+    }
+
+    
+
+    void FilterByLanguage(ChangeEventArgs e)
+    {
+        selectedLanguage = e.Value.ToString();
+        FilterData();
+    }
+
+    void FilterByTopic(ChangeEventArgs e)
+    {
+        selectedTopic = e.Value.ToString();
+        FilterData();
+    }
+
+    void FilterData()
+    {
+        repositories = repositories.Where(r =>
+            (string.IsNullOrEmpty(selectedLanguage) || r.language.languageName == selectedLanguage) &&
+            (string.IsNullOrEmpty(selectedTopic) || r.repositoryTopics.Any(t => t.topicName == selectedTopic))
+        ).ToList();
+        StateHasChanged();
     }
 
 }
