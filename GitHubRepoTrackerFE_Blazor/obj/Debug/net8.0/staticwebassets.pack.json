@@ -1,0 +1,45 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\bin\\Debug\\net8.0\\wwwroot\\_framework\\blazor.webassembly.js",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js"
+    },
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\obj\\Debug\\net8.0\\compressed\\4r5k54pu26.gz",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\wwwroot\\appsettings.json",
+      "PackagePath": "staticwebassets\\appsettings.json"
+    },
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\wwwroot\\css\\app.css",
+      "PackagePath": "staticwebassets\\css\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\wwwroot\\icon-192.png",
+      "PackagePath": "staticwebassets\\icon-192.png"
+    },
+    {
+      "Id": "C:\\Users\\v-daarusey\\OneDrive - Microsoft\\Documents\\Work\\Faculty\\FrontEndBlazor\\GitHubRepoTrackerFE_Blazor\\GitHubRepoTrackerFE_Blazor\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.GitHubRepoTrackerFE_Blazor.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.GitHubRepoTrackerFE_Blazor.props",
+      "PackagePath": "build\\GitHubRepoTrackerFE_Blazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.GitHubRepoTrackerFE_Blazor.props",
+      "PackagePath": "buildMultiTargeting\\GitHubRepoTrackerFE_Blazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.GitHubRepoTrackerFE_Blazor.props",
+      "PackagePath": "buildTransitive\\GitHubRepoTrackerFE_Blazor.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

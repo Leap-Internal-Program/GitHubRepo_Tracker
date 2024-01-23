@@ -1,0 +1,61 @@
+﻿@using GitHubRepoTrackerFE_Blazor.Interfaces
+@using GitHubRepoTrackerFE_Blazor.Models
+@page "/"
+@inject IRepoService reposervice
+@inject ILanguageService languageservice
+
+
+<PageTitle>Home</PageTitle>
+<Header />
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>RepoName</th>
+                <th>Description</th>
+                <th>Stars</th>
+                <th>Forks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var repository in repositories)
+            {
+                <tr>
+                    <td>@repository.repositoryName</td>
+                    <td>@repository.description</td>
+                    <td>@repository.stargazersCount</td>
+                    <td>@repository.forksCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @*<div class="pagination">
+        @for (var i = 1; i <= totalPages; i++)
+        {
+            <button class="@(currentPage == i ? "active" : "")" @onclick="ChangePage(i)">@i</button>
+        }
+    </div>
+    *@
+
+
+@code
+{
+    private List<Repository> repositories { get; set; }
+    private List<Language> languages { get; set; }
+    private List<Topic> topics { get; set; }
+}
+
+@functions {
+    protected override async void OnInitialized()
+    {
+        repositories = await reposervice.GetAllRepos();
+       @* languages = await languageservice.GetAllLanguages(); *@
+
+        base.OnInitialized();
+    }
+
+}
+
+
