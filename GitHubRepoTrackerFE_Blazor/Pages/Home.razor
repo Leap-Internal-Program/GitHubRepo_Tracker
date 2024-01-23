@@ -3,33 +3,77 @@
 @page "/"
 @inject IRepoService reposervice
 @inject ILanguageService languageservice
+@inject ITopicService topicservice
 
 
 <PageTitle>Home</PageTitle>
 <Header />
 
-
+@if (repositories is not null)
+{
+    <div class="row form-group">
+        <div class="col-md-8"></div>
+        <div class="col-md-2">
+            <select>
+                @foreach (var language in languages)
+                {
+                    <option value="@language.languageName">@language.languageName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select>
+                @foreach (var topic in topics)
+                {
+                    <option value="@topic.topicName">@topic.topicName</option>
+                }
+            </select>
+        </div>
+    </div>
     <table class="table">
         <thead>
             <tr>
                 <th>RepoName</th>
                 <th>Description</th>
+                <th>Language</th>
+                <th>Topics</th>
+                <th>Last updated</th>
                 <th>Stars</th>
                 <th>Forks</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var repository in repositories)
+
+            @foreach (var repo in repositories)
             {
                 <tr>
-                    <td>@repository.repositoryName</td>
-                    <td>@repository.description</td>
-                    <td>@repository.stargazersCount</td>
-                    <td>@repository.forksCount</td>
+                    <td>@repo.repositoryName</td>
+                    <td>@repo.description</td>
+                    <td>@repo.language.languageName</td>
+                    
+                    <td style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                            @foreach (var topic in repo.repositoryTopics)
+                            {
+                            <div>@topic.topicName</div>
+                            }
+                    </td>
+                    <td>@repo.updatedAt</td>
+                    <td>@repo.forksCount</td>
+                    <td>@repo.stargazersCount</td>
                 </tr>
             }
+
+
         </tbody>
+        
+
     </table>
+}
+    
+else
+{
+        <p>Loading repositories...</p>
+}
 
     @*<div class="pagination">
         @for (var i = 1; i <= totalPages; i++)
@@ -48,12 +92,14 @@
 }
 
 @functions {
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         repositories = await reposervice.GetAllRepos();
-       @* languages = await languageservice.GetAllLanguages(); *@
+        languages = await languageservice.GetAllLanguages();
+        topics = await topicservice.GetAllTopics();
 
-        base.OnInitialized();
+   
+    
     }
 
 }

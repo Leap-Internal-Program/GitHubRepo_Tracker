@@ -13,7 +13,6 @@ namespace GitHubRepoTrackerFE_Blazor.Services
         private readonly HttpClient _client;
         private readonly IConfiguration _configuration;
         private readonly IApiAuthService _apiAuthService;
-        private readonly string BaseUrl;
       
 
         public RepoService(HttpClient client, IConfiguration configuration, IApiAuthService apiAuthService)
@@ -22,7 +21,6 @@ namespace GitHubRepoTrackerFE_Blazor.Services
             _configuration = configuration;
             _apiAuthService = apiAuthService;
 
-            BaseUrl = _configuration.GetValue<string>("ApiBaseUrl");
 
         }
         public async Task<List<Repository>> GetAllRepos()
@@ -44,7 +42,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
             {
 
 
-                var builder = new UriBuilder(BaseUrl + _configuration.GetValue<string>("ApiEndpoints:GetAllReposEndpoint"));
+                var builder = new UriBuilder(_client.BaseAddress + _configuration.GetValue<string>("ApiEndpoints:GetAllReposEndpoint"));
 
                 var query = HttpUtility.ParseQueryString(builder.Query);
                 query["pageNumber"] = pageNumber.ToString();

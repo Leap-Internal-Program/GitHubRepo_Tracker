@@ -1,6 +1,8 @@
 ﻿using GitHubRepoTrackerFE_Blazor.Interfaces;
 using GitHubRepoTrackerFE_Blazor.Models;
 using Newtonsoft.Json;
+using System.Net.Http;
+using System.Net;
 using System.Text;
 
 namespace GitHubRepoTrackerFE_Blazor.Services
@@ -9,13 +11,12 @@ namespace GitHubRepoTrackerFE_Blazor.Services
     {
         private readonly HttpClient _client;
         private readonly IConfiguration _configuration;
-        private readonly string BaseUrl;
         public ApiAuthService(HttpClient client, IConfiguration configuration)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _configuration = configuration;
 
-            BaseUrl = _configuration.GetValue<string>("ApiBaseUrl");
+        
         }
 
         public async Task<string> GetAccessTokenAsync()
@@ -29,8 +30,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                 password = _configuration.GetValue<string>("Password")
             };
 
-
-            var builder = new UriBuilder(BaseUrl + _configuration.GetValue<string>("ApiEndpoints:GetAccessToken"));
+            var builder = new UriBuilder(_client.BaseAddress + _configuration.GetValue<string>("ApiEndpoints:GetAccessToken"));
             var url = builder.ToString();
 
             var userJson = JsonConvert.SerializeObject(user);
