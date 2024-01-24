@@ -10,13 +10,13 @@
 <PageTitle>Home</PageTitle>
 <Header />
 
-@if (repositories is not null && topics is not null && languages is not null)
+@if (RepositoryListModel.repositories is not null && RepositoryListModel.topics is not null && RepositoryListModel.languages is not null)
 {
     <div class="filters text-right">
         <label>Filter by Language:</label>
         <select @onchange="FilterByLanguage">
                 <option value="Select" selected disabled="disabled">Choose Language</option>
-                @foreach (var language in languages)
+                @foreach (var language in RepositoryListModel.languages)
                 {
                    
                     <option value="@language.languageName">@language.languageName</option>
@@ -28,16 +28,17 @@
         <select @onchange="FilterByTopic">
                 <option value="Select" selected disabled="disabled">Choose Topic</option>
 
-                @foreach (var topic in topics)
+            @foreach (var topic in RepositoryListModel.topics)
                 {
                     <option value="@topic.topicName">@topic.topicName</option>
                 }
         </select>
     </div>
-    
-    <table class="table">
+
+    <table class="table table-bordered">
         <thead>
             <tr>
+                <th>Index</th>
                 <th>RepoName</th>
                 <th>Description</th>
                 <th>Language</th>
@@ -48,27 +49,33 @@
             </tr>
         </thead>
         <tbody>
+            @{
+                int index = 1;
+                foreach (var repo in RepositoryListModel.repositories)
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td>@repo.repositoryName</td>
+                        <td>@repo.description</td>
+                        <td>@repo.language.languageName</td>
 
-            @foreach (var repo in repositories)
-            {
-                <tr>
-                    <td>@repo.repositoryName</td>
-                    <td>@repo.description</td>
-                    <td>@repo.language.languageName</td>
-                    
-                    <td style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
-                            @foreach (var topic in repo.repositoryTopics)
-                            {
-                            <div>@topic.topicName</div>
-                            }
-                    </td>
-                    <td>@repo.updatedAt</td>
-                    <td>@repo.forksCount</td>
-                    <td>@repo.stargazersCount</td>
-                </tr>
+                        <td>
+                            <ul>
+
+                                @foreach (var topic in repo.repositoryTopics)
+                                {
+                                    <li>@topic.topicName</li>
+                                }
+                            </ul>
+                            
+                        </td>
+                        <td>@repo.updatedAt</td>
+                        <td>@repo.forksCount</td>
+                        <td>@repo.stargazersCount</td>
+                    </tr>
+                    index++;
+                }
             }
-
-
         </tbody>
         
 
@@ -85,10 +92,7 @@ else
 
 @code
 {
-    private List<Repository> repositories { get; set; }
-    private List<Language> languages { get; set; }
-    private List<Topic> topics { get; set; }
-
+    RepositoryListModel RepositoryListModel = new RepositoryListModel();
     string selectedLanguage = "";
     string selectedTopic = "";
 
@@ -97,9 +101,9 @@ else
 @functions {
     protected override async Task OnInitializedAsync()
     {
-        repositories = await reposervice.GetAllRepos();
-        languages = await languageservice.GetAllLanguages();
-        topics = await topicservice.GetAllTopics();
+        RepositoryListModel.repositories = await reposervice.GetAllRepos();
+        RepositoryListModel.languages = await languageservice.GetAllLanguages();
+        RepositoryListModel.topics = await topicservice.GetAllTopics();
 
     
     }
@@ -120,7 +124,7 @@ else
 
     void FilterData()
     {
-        repositories = repositories.Where(r =>
+        RepositoryListModel.repositories = RepositoryListModel.repositories.Where(r =>
             (string.IsNullOrEmpty(selectedLanguage) || r.language.languageName == selectedLanguage) &&
             (string.IsNullOrEmpty(selectedTopic) || r.repositoryTopics.Any(t => t.topicName == selectedTopic))
         ).ToList();
