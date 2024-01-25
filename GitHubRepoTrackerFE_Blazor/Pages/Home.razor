@@ -43,9 +43,9 @@
                 <th>Description</th>
                 <th>Language</th>
                 <th>Topics</th>
-                <th>Last updated</th>
-                <th>Stars</th>
-                <th>Forks</th>
+                <th @onclick='() => SortTable("updatedAt")'>Last updated</th>
+                <th @onclick='() => SortTable("stargazersCount")'>Stars</th>
+                <th @onclick='() => SortTable("forksCount")'>Forks</th>
             </tr>
         </thead>
         <tbody>
@@ -70,8 +70,8 @@
                             
                         </td>
                         <td>@repo.updatedAt</td>
-                        <td>@repo.forksCount</td>
                         <td>@repo.stargazersCount</td>
+                        <td>@repo.forksCount</td>
                     </tr>
                     index++;
                 }
@@ -95,6 +95,8 @@ else
     RepositoryListModel RepositoryListModel = new RepositoryListModel();
     string selectedLanguage = "";
     string selectedTopic = "";
+    private string sortColumn = "updatedAt";
+    private bool isDescending = true;
 
 }
 
@@ -104,6 +106,9 @@ else
         RepositoryListModel.repositories = await reposervice.GetAllRepos();
         RepositoryListModel.languages = await languageservice.GetAllLanguages();
         RepositoryListModel.topics = await topicservice.GetAllTopics();
+
+        RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        
 
     
     }
@@ -130,6 +135,30 @@ else
         ).ToList();
         StateHasChanged();
     }
+
+
+    private void SortTable(string columnName)
+    {
+        if (columnName != sortColumn) // if the column is different from the previous one, sort descending by default
+        {
+            RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+            isDescending = true;
+            sortColumn = columnName;
+        }
+        else // if the column is the same as the previous one, toggle the sort direction
+        {
+            if (isDescending) // if previously ascending, sort descending
+            {
+                RepositoryListModel.repositories = RepositoryListModel.repositories.OrderBy(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+            }
+            else // if previously descending, sort ascending
+            {
+                RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+            }
+            isDescending = !isDescending; // update the sort direction
+        }
+    }
+
 
 }
 
