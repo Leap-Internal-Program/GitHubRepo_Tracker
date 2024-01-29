@@ -6,7 +6,6 @@
 @inject ILanguageService languageservice
 @inject ITopicService topicservice
 
-
 <PageTitle>Home</PageTitle>
 <Header />
 
@@ -87,8 +86,6 @@ else
         <p>Loading data...</p>
 }
 
-    
-
 
 @code
 {
@@ -108,12 +105,8 @@ else
         RepositoryListModel.topics = await topicservice.GetAllTopics();
 
         RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
-        
 
-    
     }
-
-    
 
     void FilterByLanguage(ChangeEventArgs e)
     {

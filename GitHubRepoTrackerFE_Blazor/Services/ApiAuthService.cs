@@ -1,8 +1,6 @@
 ﻿using GitHubRepoTrackerFE_Blazor.Interfaces;
 using GitHubRepoTrackerFE_Blazor.Models;
 using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net;
 using System.Text;
 
 namespace GitHubRepoTrackerFE_Blazor.Services
