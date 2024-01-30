@@ -34,7 +34,7 @@
         </select>
     </div>
 
-    <table class="table table-bordered">
+<table class="table table-bordered">
         <thead>
             <tr>
                 <th>Index</th>
@@ -42,9 +42,9 @@
                 <th>Description</th>
                 <th>Language</th>
                 <th>Topics</th>
-                <th @onclick='() => SortTable("updatedAt")'>Last updated</th>
-                <th @onclick='() => SortTable("stargazersCount")'>Stars</th>
-                <th @onclick='() => SortTable("forksCount")'>Forks</th>
+                <th @onclick='() => SortTable("updatedAt")'>Last updated@((MarkupString)DateRow)</th>
+                <th @onclick='() => SortTable("stargazersCount")'>Stars@((MarkupString)StarsRow)</th>
+                <th @onclick='() => SortTable("forksCount")'>Forks@((MarkupString)ForksRow)</th>
             </tr>
         </thead>
         <tbody>
@@ -54,7 +54,7 @@
                 {
                     <tr>
                         <td>@index</td>
-                        <td>@repo.repositoryName</td>
+                        <td> <a target="_blank" href=@repo.url>@repo.repositoryName </a></td>
                         <td>@repo.description</td>
                         <td>@repo.language.languageName</td>
 
@@ -94,44 +94,64 @@ else
     string selectedTopic = "";
     private string sortColumn = "updatedAt";
     private bool isDescending = true;
+    string DateRow, StarsRow, ForksRow;
+    string upArrow, downArrow;
+
 
 }
 
 @functions {
     protected override async Task OnInitializedAsync()
     {
+
+        upArrow = "<img src=\"/Images/up.png\" />";
+        downArrow = "<img src=\"/Images/down.png\" />";
+
+
         RepositoryListModel.repositories = await reposervice.GetAllRepos();
         RepositoryListModel.languages = await languageservice.GetAllLanguages();
         RepositoryListModel.topics = await topicservice.GetAllTopics();
 
         RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        DateRow = downArrow;
 
     }
+
 
     void FilterByLanguage(ChangeEventArgs e)
     {
         selectedLanguage = e.Value.ToString();
-        FilterData();
+        FetchData();
     }
 
     void FilterByTopic(ChangeEventArgs e)
     {
         selectedTopic = e.Value.ToString();
-        FilterData();
+        FetchData();
     }
 
-    void FilterData()
+
+    async void FetchData()
     {
-        RepositoryListModel.repositories = RepositoryListModel.repositories.Where(r =>
+        RepositoryListModel.repositories = await reposervice.GetAllRepos();
+        if(selectedLanguage != null || selectedTopic != null)
+        {
+            RepositoryListModel.repositories = RepositoryListModel.repositories.Where(r =>
             (string.IsNullOrEmpty(selectedLanguage) || r.language.languageName == selectedLanguage) &&
-            (string.IsNullOrEmpty(selectedTopic) || r.repositoryTopics.Any(t => t.topicName == selectedTopic))
-        ).ToList();
-        StateHasChanged();
-    }
+            (string.IsNullOrEmpty(selectedTopic) || r.repositoryTopics.Any(t => t.topicName == selectedTopic)
+            )).ToList();
+        }
 
+       
+        StateHasChanged();
+        
+    }
 
     private void SortTable(string columnName)
     {
+
+        
+
         if (columnName != sortColumn) // if the column is different from the previous one, sort descending by default
         {
             RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
@@ -150,6 +170,23 @@ else
             }
             isDescending = !isDescending; // update the sort direction
         }
+
+        StarsRow = DateRow = ForksRow = "";
+        if (sortColumn == "updatedAt" && isDescending)
+            DateRow = downArrow;
+        else if (sortColumn == "updatedAt" && !isDescending)
+            DateRow = upArrow;
+
+        if (sortColumn == "stargazersCount" && isDescending)
+            StarsRow = downArrow;
+        else if (sortColumn == "stargazersCount" && !isDescending)
+            StarsRow = upArrow;
+
+        if (sortColumn == "forksCount" && isDescending)
+            ForksRow = downArrow;
+        else if (sortColumn == "forksCount" && !isDescending)
+            ForksRow = upArrow;
+            
     }
 
 
