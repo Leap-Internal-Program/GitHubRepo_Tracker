@@ -11,74 +11,86 @@
 
 @if (RepositoryListModel.repositories is not null && RepositoryListModel.topics is not null && RepositoryListModel.languages is not null)
 {
-    <div class="filters text-right">
-        <label>Filter by Language:</label>
-        <select @onchange="FilterByLanguage">
+    <div class=" row filters mb-2 float-right">
+        <div class="mr-3">
+            <button type="button" class="btn btn-secondary" @onclick='() => ResetFilters()'>Reset filters</button>
+        </div>
+        
+        <div class="mr-3">
+            <label>Filter by Language:</label>
+            <select @onchange="FilterByLanguage">
                 <option value="Select" selected disabled="disabled">Choose Language</option>
                 @foreach (var language in RepositoryListModel.languages)
                 {
-                   
+
                     <option value="@language.languageName">@language.languageName</option>
                 }
             </select>
-   
-        <label>Filter by Topics:</label>
+        </div>
 
-        <select @onchange="FilterByTopic">
+        <div>
+            <label>Filter by Topics:</label>
+
+            <select @onchange="FilterByTopic">
                 <option value="Select" selected disabled="disabled">Choose Topic</option>
 
-            @foreach (var topic in RepositoryListModel.topics)
+                @foreach (var topic in RepositoryListModel.topics)
                 {
                     <option value="@topic.topicName">@topic.topicName</option>
                 }
-        </select>
+            </select>
+        </div>
+    </div>
+    <div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>RepoName</th>
+                    <th>Description</th>
+                    <th>Language</th>
+                    <th>Topics</th>
+                    <th @onclick='() => SortTable("updatedAt")'>Last updated@((MarkupString)DateRow)</th>
+                    <th @onclick='() => SortTable("stargazersCount")'>Stars@((MarkupString)StarsRow)</th>
+                    <th @onclick='() => SortTable("forksCount")'>Forks@((MarkupString)ForksRow)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 1;
+                    foreach (var repo in RepositoryListModel.repositories)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td> <a target="_blank" href=@repo.url>@repo.repositoryName </a></td>
+                            <td>@repo.description</td>
+                            <td>@repo.language.languageName</td>
+
+                            <td>
+                                <ul>
+
+                                    @foreach (var topic in repo.repositoryTopics)
+                                    {
+                                        <li>@topic.topicName</li>
+                                    }
+                                </ul>
+
+                            </td>
+                            <td>@repo.updatedAt</td>
+                            <td>@repo.stargazersCount</td>
+                            <td>@repo.forksCount</td>
+                        </tr>
+                        index++;
+                    }
+                }
+            </tbody>
+
+
+        </table>
     </div>
 
-<table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Index</th>
-                <th>RepoName</th>
-                <th>Description</th>
-                <th>Language</th>
-                <th>Topics</th>
-                <th @onclick='() => SortTable("updatedAt")'>Last updated@((MarkupString)DateRow)</th>
-                <th @onclick='() => SortTable("stargazersCount")'>Stars@((MarkupString)StarsRow)</th>
-                <th @onclick='() => SortTable("forksCount")'>Forks@((MarkupString)ForksRow)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                int index = 1;
-                foreach (var repo in RepositoryListModel.repositories)
-                {
-                    <tr>
-                        <td>@index</td>
-                        <td> <a target="_blank" href=@repo.url>@repo.repositoryName </a></td>
-                        <td>@repo.description</td>
-                        <td>@repo.language.languageName</td>
 
-                        <td>
-                            <ul>
-
-                                @foreach (var topic in repo.repositoryTopics)
-                                {
-                                    <li>@topic.topicName</li>
-                                }
-                            </ul>
-                            
-                        </td>
-                        <td>@repo.updatedAt</td>
-                        <td>@repo.stargazersCount</td>
-                        <td>@repo.forksCount</td>
-                    </tr>
-                    index++;
-                }
-            }
-        </tbody>
-        
-
-    </table>
 }
     
 else
@@ -113,6 +125,8 @@ else
         RepositoryListModel.topics = await topicservice.GetAllTopics();
 
         RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        RepositoryListModel.topics = RepositoryListModel.topics.OrderBy(r => r.GetType().GetProperty("topicName").GetValue(r, null)).ToList();
+        RepositoryListModel.languages = RepositoryListModel.languages.OrderBy(r => r.GetType().GetProperty("languageName").GetValue(r, null)).ToList();
         DateRow = downArrow;
 
     }
@@ -142,15 +156,26 @@ else
             )).ToList();
         }
 
-       
+        RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+
+
         StateHasChanged();
-        
+
     }
+
+    async void ResetFilters()
+    {
+        selectedLanguage = "";
+        selectedTopic = "";
+        FetchData();
+
+    }
+
+    
 
     private void SortTable(string columnName)
     {
 
-        
 
         if (columnName != sortColumn) // if the column is different from the previous one, sort descending by default
         {
