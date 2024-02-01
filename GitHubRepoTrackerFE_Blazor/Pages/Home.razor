@@ -5,15 +5,16 @@
 @inject IRepoService reposervice
 @inject ILanguageService languageservice
 @inject ITopicService topicservice
+@inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
 <Header />
 
 @if (RepositoryListModel.repositories is not null && RepositoryListModel.topics is not null && RepositoryListModel.languages is not null)
 {
-    <div class=" row filters mb-2 float-right">
+    <div class=" row filters mb-2 float-right sticky-top">
         <div class="mr-3">
-            <button type="button" class="btn btn-secondary" @onclick='() => ResetFilters()'>Reset filters</button>
+            <button type="button" class="btn btn-secondary" @onclick='() =>OnInitializedAsync()'>Reset filters</button>
         </div>
         
         <div class="mr-3">
@@ -85,6 +86,18 @@
                     }
                 }
             </tbody>
+            @if(totalPages > 1)
+            {
+                <tfoot>
+                    <Pagination TotalPages="@(totalPages != 0 ? totalPages : 1)"
+                                PageIndex="@pageIndex"
+                                Radius="3"
+                                OnSelectedPage="@SelectedPage">
+                    </Pagination>
+                </tfoot>
+            }
+
+            
 
 
         </table>
@@ -109,6 +122,11 @@ else
     string DateRow, StarsRow, ForksRow;
     string upArrow, downArrow;
 
+    private int pageIndex = 1;
+    private int itemsPerPage = 5;
+    private int totalPages = 1;
+    private int skipCount = 0;
+
 
 }
 
@@ -120,14 +138,26 @@ else
         downArrow = "<img src=\"/Images/down.png\" />";
 
 
-        RepositoryListModel.repositories = await reposervice.GetAllRepos();
+        RepositoryListModel.allrepositories = await reposervice.GetAllRepos();
         RepositoryListModel.languages = await languageservice.GetAllLanguages();
         RepositoryListModel.topics = await topicservice.GetAllTopics();
 
-        RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
         RepositoryListModel.topics = RepositoryListModel.topics.OrderBy(r => r.GetType().GetProperty("topicName").GetValue(r, null)).ToList();
         RepositoryListModel.languages = RepositoryListModel.languages.OrderBy(r => r.GetType().GetProperty("languageName").GetValue(r, null)).ToList();
         DateRow = downArrow;
+
+
+        if (RepositoryListModel.allrepositories != null)
+        {
+            // Initialize the number of "totalPages"
+            totalPages = (int)(RepositoryListModel.allrepositories.Count() / itemsPerPage);
+
+            // Initialize the "repositories" which will be displayed when the page loaded first time.
+
+
+            RepositoryListModel.repositories = RepositoryListModel.allrepositories.Skip(skipCount).Take(itemsPerPage).OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        }
 
     }
 
@@ -147,16 +177,31 @@ else
 
     async void FetchData()
     {
-        RepositoryListModel.repositories = await reposervice.GetAllRepos();
+        RepositoryListModel.allrepositories = await reposervice.GetAllRepos();
         if(selectedLanguage != null || selectedTopic != null)
         {
-            RepositoryListModel.repositories = RepositoryListModel.repositories.Where(r =>
+            RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.Where(r =>
             (string.IsNullOrEmpty(selectedLanguage) || r.language.languageName == selectedLanguage) &&
             (string.IsNullOrEmpty(selectedTopic) || r.repositoryTopics.Any(t => t.topicName == selectedTopic)
             )).ToList();
         }
+        RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
 
-        RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        if (RepositoryListModel.allrepositories != null)
+        {
+            // Initialize the number of "totalPages"
+            totalPages = (int)(RepositoryListModel.allrepositories.Count() / itemsPerPage);
+            pageIndex = 1;
+            skipCount = 0;
+
+            // Initialize the "repositories" which will be displayed when the page loaded first time.
+
+
+            RepositoryListModel.repositories = RepositoryListModel.allrepositories.Skip(skipCount).Take(itemsPerPage).OrderByDescending(r => r.GetType().GetProperty(sortColumn).GetValue(r, null)).ToList();
+        }
+
+       
+
 
 
         StateHasChanged();
@@ -171,6 +216,17 @@ else
 
     }
 
+    private void SelectedPage(int selectedPageIndex)
+    {
+        
+        if (RepositoryListModel.allrepositories != null)
+        {
+            pageIndex = selectedPageIndex;
+            skipCount = itemsPerPage * (pageIndex - 1);
+            RepositoryListModel.repositories = RepositoryListModel.allrepositories.Skip(skipCount).Take(itemsPerPage).ToList();
+        }
+    }
+
     
 
     private void SortTable(string columnName)
@@ -179,7 +235,7 @@ else
 
         if (columnName != sortColumn) // if the column is different from the previous one, sort descending by default
         {
-            RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+            RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
             isDescending = true;
             sortColumn = columnName;
         }
@@ -187,14 +243,16 @@ else
         {
             if (isDescending) // if previously ascending, sort descending
             {
-                RepositoryListModel.repositories = RepositoryListModel.repositories.OrderBy(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+                RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.OrderBy(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
             }
             else // if previously descending, sort ascending
             {
-                RepositoryListModel.repositories = RepositoryListModel.repositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
+                RepositoryListModel.allrepositories = RepositoryListModel.allrepositories.OrderByDescending(r => r.GetType().GetProperty(columnName).GetValue(r, null)).ToList();
             }
             isDescending = !isDescending; // update the sort direction
         }
+
+        RepositoryListModel.repositories = RepositoryListModel.allrepositories.Skip(skipCount).Take(itemsPerPage).ToList();
 
         StarsRow = DateRow = ForksRow = "";
         if (sortColumn == "updatedAt" && isDescending)
@@ -211,7 +269,9 @@ else
             ForksRow = downArrow;
         else if (sortColumn == "forksCount" && !isDescending)
             ForksRow = upArrow;
+
             
+        
     }
 
 
