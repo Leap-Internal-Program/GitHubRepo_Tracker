@@ -47,5 +47,92 @@ namespace GitHubRepoTrackerTest.Pages
 
         }
 
+        [Fact]
+        public async Task FilterByTopic_ShouldFilterRepositoriesCorrectly()
+        {
+            // Arrange
+            var mockRepoService = new Mock<IRepoService>();
+            var mockLanguageService = new Mock<ILanguageService>();
+            var mockTopicService = new Mock<ITopicService>();
+
+            var topics = new List<Topic>
+            {
+                new Topic { topicName = "Topic1" },
+                new Topic { topicName = "Topic2" },
+                new Topic { topicName = "Topic3" },
+                new Topic { topicName = "Topic4" }
+            };
+
+            var repositories = new List<Repository>
+            {
+                new Repository
+                {
+                    repositoryName = "Repo1",
+                    description = "Description for Repo1",
+                    url = "https://github.com/repo1",
+                    language = new Language { languageName = "C#" },
+                    repositoryTopics = new Topic[]
+                    {
+                        new Topic { topicName = "Topic1" },
+                        new Topic { topicName = "Topic2" }
+                    },
+                    updatedAt = DateTime.Now.AddDays(-1),
+                    forksCount = 10,
+                    stargazersCount = 20
+                },
+
+                new Repository
+                {
+                repositoryName = "Repo2",
+                description = "Description for Repo2",
+                url = "https://github.com/repo2",
+                language = new Language { languageName = "JavaScript" },
+                repositoryTopics = new Topic[]
+                {
+                    new Topic { topicName = "Topic3" },
+                    new Topic { topicName = "Topic4" }
+                },
+                updatedAt = DateTime.Now.AddDays(-2),
+                forksCount = 15,
+                stargazersCount = 25
+                },
+                new Repository
+                {
+                repositoryName = "Repo3",
+                description = "Description for Repo3",
+                url = "https://github.com/rep32",
+                language = new Language { languageName = "JavaScript" },
+                repositoryTopics = new Topic[]
+                {
+                    new Topic { topicName = "Topic3" },
+                    new Topic { topicName = "Topic4" }
+                },
+                updatedAt = DateTime.Now.AddDays(-2),
+                forksCount = 19,
+                stargazersCount = 20
+                }
+            };
+
+
+            mockRepoService.Setup(service => service.GetAllRepos()).ReturnsAsync(repositories);
+            mockLanguageService.Setup(service => service.GetAllLanguages()).ReturnsAsync(new List<Language>());
+            mockTopicService.Setup(service => service.GetAllTopics()).ReturnsAsync(topics);
+
+            Services.AddSingleton(mockRepoService.Object);
+            Services.AddSingleton(mockLanguageService.Object);
+            Services.AddSingleton(mockTopicService.Object);
+
+            var cut = RenderComponent<Home>();
+
+            // Act
+            var topicDropdown = cut.Find("#select_topic");
+            topicDropdown.Change("Topic1"); // Simulate selecting Topic1
+
+            // Assert
+            cut.WaitForState(() => cut.FindAll("tbody tr").Count == 1); // Wait until rendering is complete
+            Assert.Equal(1, cut.FindAll("tbody tr").Count); // Ensure that only repositories with Topic1 are displayed
+        }
+
+
     }
 }
