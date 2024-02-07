@@ -19,8 +19,9 @@
         
         <div class="mr-3">
             <label>Filter by Language:</label>
-            <select @onchange="FilterByLanguage">
+            <select id="select_language" @onchange="FilterByLanguage">
                 <option value="Select" selected disabled="disabled">Choose Language</option>
+                <option value="">Clear Language Filters</option>
                 @foreach (var language in RepositoryListModel.languages)
                 {
 
@@ -32,7 +33,7 @@
         <div>
             <label>Filter by Topics:</label>
 
-            <select @onchange="FilterByTopic">
+            <select id="select_topic" @onchange="FilterByTopic">
                 <option value="Select" selected disabled="disabled">Choose Topic</option>
 
                 @foreach (var topic in RepositoryListModel.topics)
@@ -114,7 +115,7 @@ else
 
 @code
 {
-    RepositoryListModel RepositoryListModel = new RepositoryListModel();
+    public RepositoryListModel RepositoryListModel = new RepositoryListModel();
     string selectedLanguage = "";
     string selectedTopic = "";
     private string sortColumn = "updatedAt";
