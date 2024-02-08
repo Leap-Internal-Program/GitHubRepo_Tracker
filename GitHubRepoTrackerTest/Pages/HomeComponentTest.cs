@@ -11,7 +11,10 @@ namespace GitHubRepoTrackerTest.Pages
     public class HomeComponentTest : TestContext
     {
 
-        
+        /// <summary>
+        /// Tests the RepoService,LanguageService and TopicService injection
+        /// </summary>
+        /// <returns></returns>
 
         [Fact]
         public async Task TestServiceInjection()
@@ -46,6 +49,11 @@ namespace GitHubRepoTrackerTest.Pages
 
 
         }
+
+        /// <summary>
+        /// Test the filter by topic. If the filter is correct, the repositories on the table should only be 2
+        /// </summary>
+        /// <returns></returns>
 
         [Fact]
         public async Task FilterByTopic_ShouldFilterRepositoriesCorrectly()
@@ -89,7 +97,7 @@ namespace GitHubRepoTrackerTest.Pages
                 language = new Language { languageName = "JavaScript" },
                 repositoryTopics = new Topic[]
                 {
-                    new Topic { topicName = "Topic3" },
+                    new Topic { topicName = "Topic1" },
                     new Topic { topicName = "Topic4" }
                 },
                 updatedAt = DateTime.Now.AddDays(-2),
@@ -129,8 +137,8 @@ namespace GitHubRepoTrackerTest.Pages
             topicDropdown.Change("Topic1"); // Simulate selecting Topic1
 
             // Assert
-            cut.WaitForState(() => cut.FindAll("tbody tr").Count == 1); // Wait until rendering is complete
-            Assert.Equal(1, cut.FindAll("tbody tr").Count); // Ensure that only repositories with Topic1 are displayed
+            cut.WaitForState(() => cut.FindAll("tbody tr").Count == 2); // Wait until rendering is complete
+            Assert.Equal(2, cut.FindAll("tbody tr").Count); // Ensure that only repositories with Topic1 are displayed
         }
 
 
