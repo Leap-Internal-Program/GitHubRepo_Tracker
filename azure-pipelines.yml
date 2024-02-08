@@ -1,0 +1,58 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+  # Provision Azure resources
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
+      subscriptionId: '$(AZURE_SUBSCRIPTION_ID)'
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
+      location: '$(AZURE_RESOURCE_LOCATION)'
+      templateLocation: 'Linked artifact'
+      csmFile: 'rg-deployment.bicep'
+      overrideParameters: |
+        -appServiceName "$(AZURE_FE_APP_SERVICE_NAME)"
+      deploymentMode: 'Incremental'
+      deploymentName: '$(AZURE_FE_RESOURCE_GROUP_NAME)-$(Build.SourceVersion)'
+    displayName: 'Create front-end Azure resources'
+
+  # Build projects
+  - script: dotnet build --configuration $(buildConfiguration)
+    displayName: 'dotnet build $(buildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'GitHubRepoTrackerFE_Blazor'
+
+  # Deploy build to app service
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
+      appType: 'webApp'
+      WebAppName: '$(AZURE_FE_APP_SERVICE_NAME)'
+      packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
