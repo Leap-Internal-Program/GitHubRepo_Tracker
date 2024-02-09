@@ -1,6 +1,7 @@
 ﻿@using GitHubRepoTrackerFE_Blazor.Interfaces
 @using GitHubRepoTrackerFE_Blazor.Models
 @using System.Linq
+@using Microsoft.JSInterop;
 @page "/"
 @inject IRepoService reposervice
 @inject ILanguageService languageservice
@@ -14,13 +15,14 @@
 {
     <div class=" row filters mb-2 float-right sticky-top">
         <div class="mr-3">
-            <button type="button" class="btn btn-secondary" @onclick='() =>OnInitializedAsync()'>Reset filters</button>
+            <button class="btn btn-secondary" @onclick='ResetFilters'>Reset filters</button>
         </div>
         
         <div class="mr-3">
             <label>Filter by Language:</label>
-            <select @onchange="FilterByLanguage">
-                <option value="Select" selected disabled="disabled">Choose Language</option>
+            <select id="select_language" @onchange="FilterByLanguage" value="@selectedLanguage">
+                <option value="" selected disabled >Choose Language</option>
+               
                 @foreach (var language in RepositoryListModel.languages)
                 {
 
@@ -32,8 +34,8 @@
         <div>
             <label>Filter by Topics:</label>
 
-            <select @onchange="FilterByTopic">
-                <option value="Select" selected disabled="disabled">Choose Topic</option>
+            <select id="select_topic" @onchange="FilterByTopic" value="@selectedTopic">
+                <option value="" selected disabled>Choose Topic</option>
 
                 @foreach (var topic in RepositoryListModel.topics)
                 {
@@ -114,7 +116,7 @@ else
 
 @code
 {
-    RepositoryListModel RepositoryListModel = new RepositoryListModel();
+    public RepositoryListModel RepositoryListModel = new RepositoryListModel();
     string selectedLanguage = "";
     string selectedTopic = "";
     private string sortColumn = "updatedAt";
