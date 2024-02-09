@@ -29,8 +29,16 @@ steps:
       overrideParameters: |
         -appServiceName "$(AZURE_FE_APP_SERVICE_NAME)"
       deploymentMode: 'Incremental'
-      deploymentName: '$(AZURE_FE_RESOURCE_GROUP_NAME)-$(Build.SourceVersion)'
+      deploymentOutputs: deploymentOutputs
     displayName: 'Create front-end Azure resources'
+
+  # Store app service name
+  - bash: |
+      echo "##vso[task.setvariable variable=UNIQUE_APP_NAME; isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.uniqueAppServiceName.value')"
+    name: storeDeploymentOutputs
+    displayName: Save deployment outputs into variables
+    env:
+      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
@@ -42,6 +50,7 @@ steps:
       publishWebProjects: true
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
       zipAfterPublish: true
+    displayName: 'dotnet publish $(buildConfiguration)'
 
   - task: PublishBuildArtifacts@1
     inputs:
@@ -54,5 +63,5 @@ steps:
       ConnectionType: 'AzureRM'
       azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
       appType: 'webApp'
-      WebAppName: '$(AZURE_FE_APP_SERVICE_NAME)'
+      WebAppName: '$(UNIQUE_APP_NAME)'
       packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
