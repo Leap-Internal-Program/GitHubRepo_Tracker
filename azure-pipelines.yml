@@ -40,6 +40,23 @@ steps:
     env:
       DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
+  # Configure app service application settings
+  - task: AzureAppServiceSettings@1
+    inputs:
+      azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+      appName: '$(UNIQUE_APP_NAME)'
+      resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
+      appSettings: |
+        [
+          { "name": "ApiBaseUrl": "$(GitHubAccessToken)", "slotSetting": false },
+          { "name": "ApiEndpoints__GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
+          { "name": "ApiEndpoints__GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
+          { "name": "ApiEndpoints__GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
+          { "name": "ApiEndpoints__GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
+          { "name": "Token__UserName", "value": "$(USERNAME)", "slotSetting": false },
+          { "name": "Token__Password", "value": "$(PASSWORD)", "slotSetting": false },
+        ]
+
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
