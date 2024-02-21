@@ -48,7 +48,7 @@ steps:
       resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
       appSettings: |
         [
-          { "name": "ApiBaseUrl": "$(GitHubAccessToken)", "slotSetting": false },
+          { "name": "ApiBaseUrl", "value": "https://gitrepobemfidahy52nqmg.azurewebsites.net/", "slotSetting": false },
           { "name": "ApiEndpoints__GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
           { "name": "ApiEndpoints__GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
           { "name": "ApiEndpoints__GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
