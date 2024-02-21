@@ -1,5 +1,4 @@
-﻿GitHubRepoTrackerFE_Blazor/bin/Debug/
-GitHubRepoTrackerFE_Blazor/obj/
-GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json
+﻿**/bin
+**/obj
+**/wwwroot/appsettings.json
 .vs/
-
