@@ -11,12 +11,13 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
   location: location
   name: '${appServiceName}${uniqueString(resourceGroup().id)}'
   properties: {
-    appInsights:[
+     httpsOnly: true // Default: false
+     appInsights:[
       {
         name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
         value: appInsights.properties.InstrumentationKey
       }    
-    ]
+      ]
   }
 }
 
