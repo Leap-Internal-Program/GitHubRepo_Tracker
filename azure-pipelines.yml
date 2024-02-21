@@ -43,9 +43,9 @@ steps:
   # Configure app service application settings
   - task: AzureAppServiceSettings@1
     inputs:
-      azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+      azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
       appName: '$(UNIQUE_APP_NAME)'
-      resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
+      resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
       appSettings: |
         [
           { "name": "ApiBaseUrl", "value": "https://gitrepobemfidahy52nqmg.azurewebsites.net/", "slotSetting": false },
