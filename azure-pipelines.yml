@@ -53,8 +53,8 @@ steps:
           { "name": "ApiEndpoints:GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
           { "name": "ApiEndpoints:GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
           { "name": "ApiEndpoints:GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
-          { "name": "UserName", "value": "$(USERNAME)", "slotSetting": false },
-          { "name": "Password", "value": "$(PASSWORD)", "slotSetting": false }
+          { "name": "TokenUserName", "value": "$(USERNAME)", "slotSetting": false },
+          { "name": "TokenPassword", "value": "$(PASSWORD)", "slotSetting": false }
         ]
 
   # Build projects
