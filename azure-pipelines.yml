@@ -40,6 +40,23 @@ steps:
     env:
       DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
+  # Configure app service application settings
+  - task: AzureAppServiceSettings@1
+    inputs:
+      azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
+      appName: '$(UNIQUE_APP_NAME)'
+      resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
+      appSettings: |
+        [
+          { "name": "ApiBaseUrl", "value": "https://gitrepobemfidahy52nqmg.azurewebsites.net/", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
+          { "name": "Token:UserName", "value": "$(USERNAME)", "slotSetting": false },
+          { "name": "Token:Password", "value": "$(PASSWORD)", "slotSetting": false }
+        ]
+
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
