@@ -23,9 +23,9 @@ namespace GitHubRepoTrackerFE_Blazor.Services
 
             var user = new User()
             {
-                userName = _configuration.GetValue<string>("UserName"),
+                userName = _configuration.GetValue<string>("TokenUserName"),
 
-                password = _configuration.GetValue<string>("Password")
+                password = _configuration.GetValue<string>("TokenPassword")
             };
 
             var builder = new UriBuilder(_client.BaseAddress + _configuration.GetValue<string>("ApiEndpoints:GetAccessToken"));
