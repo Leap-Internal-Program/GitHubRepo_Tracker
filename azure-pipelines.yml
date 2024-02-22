@@ -49,12 +49,12 @@ steps:
       appSettings: |
         [
           { "name": "ApiBaseUrl", "value": "https://gitrepobemfidahy52nqmg.azurewebsites.net/", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
-          { "name": "Token__UserName", "value": "$(USERNAME)", "slotSetting": false },
-          { "name": "Token__Password", "value": "$(PASSWORD)", "slotSetting": false }
+          { "name": "ApiEndpoints:GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
+          { "name": "ApiEndpoints:GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
+          { "name": "Token:UserName", "value": "$(USERNAME)", "slotSetting": false },
+          { "name": "Token:Password", "value": "$(PASSWORD)", "slotSetting": false }
         ]
 
   # Build projects
