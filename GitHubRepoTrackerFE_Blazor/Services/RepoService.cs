@@ -81,8 +81,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                 catch (Exception ex)
                 {
                     // handle exception
-                    Console.WriteLine(ex.ToString());
-                    _logger.LogError(ex.ToString());
+                    _logger.LogError($"Error: {ex.Message}");
                     break;
                 }
 
