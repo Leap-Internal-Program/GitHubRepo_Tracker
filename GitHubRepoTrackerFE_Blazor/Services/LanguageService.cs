@@ -77,6 +77,8 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                 {
                     // handle exception
                     Console.WriteLine(ex);
+                    _logger.LogError($"Error: {ex.Message}");
+
                     break;
                 }
 
