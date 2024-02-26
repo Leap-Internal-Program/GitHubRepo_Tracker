@@ -15,4 +15,6 @@ builder.Services.AddSingleton<IRepoService, RepoService>();
 builder.Services.AddSingleton<ILanguageService, LanguageService>();
 builder.Services.AddSingleton<ITopicService, TopicService>();
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 await builder.Build().RunAsync();

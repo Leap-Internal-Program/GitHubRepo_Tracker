@@ -13,13 +13,15 @@ namespace GitHubRepoTrackerFE_Blazor.Services
         private readonly HttpClient _client;
         private readonly IConfiguration _configuration;
         private readonly IApiAuthService _apiAuthService;
+        private readonly ILogger _logger;
       
 
-        public RepoService(HttpClient client, IConfiguration configuration, IApiAuthService apiAuthService)
+        public RepoService(HttpClient client, IConfiguration configuration, IApiAuthService apiAuthService, ILogger<RepoService> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _configuration = configuration;
             _apiAuthService = apiAuthService;
+            _logger = logger;
 
 
         }
@@ -80,6 +82,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                 {
                     // handle exception
                     Console.WriteLine(ex.ToString());
+                    _logger.LogError(ex.ToString());
                     break;
                 }
 
