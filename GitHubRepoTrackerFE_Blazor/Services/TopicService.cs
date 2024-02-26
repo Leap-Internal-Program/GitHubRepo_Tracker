@@ -12,12 +12,14 @@ namespace GitHubRepoTrackerFE_Blazor.Services
         private readonly HttpClient _client;
         private readonly IConfiguration _configuration;
         private readonly IApiAuthService _apiAuthService;
+        private readonly ILogger<TopicService> _logger;
 
-        public TopicService(HttpClient client, IConfiguration configuration, IApiAuthService apiAuthService)
+        public TopicService(HttpClient client, IConfiguration configuration, IApiAuthService apiAuthService,ILogger<TopicService> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _configuration = configuration;
             _apiAuthService = apiAuthService;
+            _logger = logger;
 
         }
         public async Task<List<Topic>> GetAllTopics()
@@ -75,7 +77,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                 catch (Exception ex)
                 {
                     // handle exception
-                    Console.WriteLine(ex.Message);
+                    _logger.LogError(ex.Message.ToString());
                     break;
                 }
             }

@@ -15,4 +15,10 @@ builder.Services.AddSingleton<IRepoService, RepoService>();
 builder.Services.AddSingleton<ILanguageService, LanguageService>();
 builder.Services.AddSingleton<ITopicService, TopicService>();
 
+builder.Logging.AddApplicationInsights(
+    configureTelemetryConfiguration: (config) =>
+    config.ConnectionString = builder.Configuration.GetConnectionString("APPINSIGHTS_INSTRUMENTATIONKEY"),
+    configureApplicationInsightsLoggerOptions: (options) => { }
+    );
+
 await builder.Build().RunAsync();
