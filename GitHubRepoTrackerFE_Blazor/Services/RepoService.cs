@@ -75,6 +75,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                     }
 
                     repos.AddRange(paginatedRepos.data);
+                    _logger.LogInformation("Repos retrieved successfully");
 
                     pageNumber++;
                 }

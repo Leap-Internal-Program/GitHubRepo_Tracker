@@ -45,6 +45,7 @@ namespace GitHubRepoTrackerFE_Blazor.Services
                     var result = await res.Content.ReadAsStringAsync();
                     var deserializedRes = JsonConvert.DeserializeObject<AccessToken>(result);
                     token = deserializedRes.Token;
+                    _logger.LogInformation("Token successful");
 
 
                 }
