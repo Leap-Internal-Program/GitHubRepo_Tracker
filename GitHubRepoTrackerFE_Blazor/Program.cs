@@ -9,7 +9,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri("https://gitrepobemfidahy52nqmg.azurewebsites.net/") });
+builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]) });
 builder.Services.AddSingleton<IApiAuthService, ApiAuthService>();
 builder.Services.AddSingleton<IRepoService, RepoService>();
 builder.Services.AddSingleton<ILanguageService, LanguageService>();
