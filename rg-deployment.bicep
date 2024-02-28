@@ -35,7 +35,7 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
       
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey};IngestionEndpoint=https://${location}-8.in.applicationinsights.azure.com/;LiveEndpoint=https://${location}.livediagnostics.monitor.azure.com/'
+          value: appInsights.outputs['ConnectionString']
         }
       ]
       
