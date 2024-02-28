@@ -35,7 +35,7 @@ resource appService 'Microsoft.Web/sites@2023-01-01' = {
       
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.outputs['ConnectionString']
+          value: appInsights.properties.ConnectionString
         }
 
         {
