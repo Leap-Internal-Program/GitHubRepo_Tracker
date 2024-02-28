@@ -54,7 +54,9 @@ steps:
           { "name": "ApiEndpoints__GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
           { "name": "ApiEndpoints__GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
           { "name": "TokenUserName", "value": "$(USERNAME)", "slotSetting": false },
-          { "name": "TokenPassword", "value": "$(PASSWORD)", "slotSetting": false }
+          { "name": "TokenPassword", "value": "$(PASSWORD)", "slotSetting": false },
+          { "name":"Logging__LogLevel__Default", "value":"Information", "slotSetting": false},
+          { "name":"Logging__LogLevel__Microsoft.AspNetCore", "value":"Warning", "slotSetting": false}
         ]
 
   # Build projects
