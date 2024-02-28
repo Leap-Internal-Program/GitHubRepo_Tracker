@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationInsightsResourceId>/subscriptions/7dbdc43b-1f97-4bd1-9018-182d807f63b5/resourceGroups/git-repository-tracker-fe-rg/providers/microsoft.insights/components/gitrepoappinsightstujr2px4qt7gq</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <ItemGroup>
