@@ -50,7 +50,7 @@ steps:
     inputs:
       folderPath: '$(Build.ArtifactStagingDirectory)'
       fileType: 'json'
-      targetFiles: '**/wwwroot/appsettings.json'
+      targetFiles: '\GitHubRepoTrackerFE_Blazor\wwwroot\appsettings.json'
 
   - task: DotNetCoreCLI@2
     inputs:
