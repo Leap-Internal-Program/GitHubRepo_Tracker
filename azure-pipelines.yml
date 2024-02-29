@@ -44,13 +44,6 @@ steps:
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
-  
-   # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: '$(Build.ArtifactStagingDirectory)'
-      fileType: 'json'
-      targetFiles: 'GitHubRepoTrackerFE_Blazor\wwwroot\appsettings.json'
 
   - task: DotNetCoreCLI@2
     inputs:
