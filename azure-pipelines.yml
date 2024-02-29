@@ -65,6 +65,14 @@ steps:
       targetPath: '$(Build.ArtifactStagingDirectory)'
       artifactName: 'GitHubRepoTrackerFE_Blazor'
 
+  # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(Build.ArtifactStagingDirectory)'
+      fileType: 'json'
+      targetFiles: 'GitHubRepoTrackerFE_Blazor\wwwroot\appsettings.json'
+
+
   # Deploy build to app service
   - task: AzureRmWebAppDeployment@4
     inputs:
