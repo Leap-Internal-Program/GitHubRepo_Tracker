@@ -63,7 +63,7 @@ steps:
     inputs:
       folderPath: '$(Build.ArtifactStagingDirectory)'
       fileType: 'json'
-      targetFiles: '$(Build.SourcesDirectory)/**/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
+      targetFiles: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
       
 
 
