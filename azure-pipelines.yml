@@ -46,19 +46,12 @@ steps:
       azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
       appName: '$(UNIQUE_APP_NAME)'
       resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-      appSettings: |
-        [
-          { "name": "ApiBaseUrl", "value": "https://gitrepobemfidahy52nqmg.azurewebsites.net/", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllReposEndpoint", "value": "api/UI/all-repositories", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllTopicsEndpoint", "value": "api/UI/all-topics", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAllLanguagesEndpoint", "value": "api/UI/all-languages", "slotSetting": false },
-          { "name": "ApiEndpoints__GetAccessToken", "value": "api/Users/BearerToken", "slotSetting": false },
-          { "name": "TokenUserName", "value": "$(USERNAME)", "slotSetting": false },
-          { "name": "TokenPassword", "value": "$(PASSWORD)", "slotSetting": false },
-          { "name":"Logging__LogLevel__Default", "value":"Information", "slotSetting": false},
-          { "name":"Logging__LogLevel__Microsoft.AspNetCore", "value":"Warning", "slotSetting": false}
-        ]
-
+  # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      fileType: 'json'
+      targetFiles: '**/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'

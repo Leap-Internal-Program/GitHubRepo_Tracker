@@ -1,4 +1,4 @@
 ﻿**/bin
 **/obj
-**/wwwroot/appsettings.json
+**/wwwroot/appsettings.Development.json
 .vs/
