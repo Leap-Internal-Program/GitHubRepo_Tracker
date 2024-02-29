@@ -46,7 +46,12 @@ steps:
       azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
       appName: '$(UNIQUE_APP_NAME)'
       resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-
+  # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      fileType: 'json'
+      targetFiles: '**/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
