@@ -43,9 +43,10 @@ steps:
   # Overwrite appsettings values
   - task: FileTransform@1
     inputs:
-      folderPath: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      folderPath: 'GitHubRepoTrackerFE_Blazor\GitHubRepoTrackerFE_Blazor'
       fileType: 'json'
-      targetFiles: '**/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
+      targetFiles: 'wwwroot/appsettings.json'
+      
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
