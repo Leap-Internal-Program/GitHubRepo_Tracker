@@ -40,16 +40,17 @@ steps:
     env:
       DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
-  # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: 'GitHubRepoTrackerFE_Blazor\GitHubRepoTrackerFE_Blazor'
-      fileType: 'json'
-      targetFiles: 'wwwroot/appsettings.json'
       
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
+  
+   # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(Build.ArtifactStagingDirectory)'
+      fileType: 'json'
+      targetFiles: '**/wwwroot/appsettings.json'
 
   - task: DotNetCoreCLI@2
     inputs:
