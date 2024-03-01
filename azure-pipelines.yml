@@ -61,9 +61,9 @@ steps:
   # Overwrite appsettings values
   - task: FileTransform@1
     inputs:
-      folderPath: '$(Build.ArtifactStagingDirectory)'
+      folderPath: $(System.DefaultWorkingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
       fileType: 'json'
-      targetFiles: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/GitHubRepoTrackerFE_Blazor/wwwroot/appsettings.json'
+      targetFiles: '**/appsettings.json'
       
 
 
