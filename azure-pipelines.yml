@@ -61,7 +61,7 @@ steps:
       zipAfterPublish: true
     displayName: 'dotnet publish $(buildConfiguration)'
 
-  - script: ls $(Build.ArtifactStagingDirectory/**.zip)
+  - script: ls $(Build.ArtifactStagingDirectory/$(Build.BuildId).zip)
     displayName: 'List Contents of Artifact Staging Directory'
 
    # Overwrite appsettings values
