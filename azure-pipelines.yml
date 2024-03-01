@@ -13,13 +13,13 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  ApiBaseUrl: '$(ApiBaseUrl)'
+  ApiBaseUrl: '$(BaseUrl)'
   ApiEndpoints.GetAllReposEndpoint: '$(GetAllReposEndpoint)'
   ApiEndpoints.GetAllTopicsEndpoint: '$(GetAllTopicsEndpoint)'
   ApiEndpoints.GetAllLanguagesEndpoint: '$(GetAllLanguagesEndpoint)'
   ApiEndpoints.GetAccessToken: '$(bearertoken)'
-  TokenUserName: '$(TokenUserName)'
-  TokenPassword: '$(TokenPassword)'
+  TokenUserName: '$(Token_UserName)'
+  TokenPassword: '$(Token_Password)'
 
 
 steps:
