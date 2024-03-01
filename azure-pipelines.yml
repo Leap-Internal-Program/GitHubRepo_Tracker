@@ -13,6 +13,14 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  ApiBaseUrl: '$(ApiBaseUrl)'
+  ApiEndpoints.GetAllReposEndpoint: '$(GetAllReposEndpoint)'
+  ApiEndpoints.GetAllTopicsEndpoint: '$(GetAllTopicsEndpoint)'
+  ApiEndpoints.GetAllLanguagesEndpoint: '$(GetAllLanguagesEndpoint)'
+  ApiEndpoints.GetAccessToken: '$(bearertoken)'
+  TokenUserName: '$(TokenUserName)'
+  TokenPassword: '$(TokenPassword)'
+
 
 steps:
   # Provision Azure resources
