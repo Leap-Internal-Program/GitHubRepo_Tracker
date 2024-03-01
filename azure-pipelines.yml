@@ -45,6 +45,12 @@ steps:
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
 
+    # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
+      fileType: 'json'
+      targetFiles: '**/appsettings.json'
   - task: DotNetCoreCLI@2
     inputs:
       command: 'publish'
@@ -57,15 +63,6 @@ steps:
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)'
       artifactName: 'GitHubRepoTrackerFE_Blazor'
-
-  # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: $(System.DefaultWorkingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
-      
-
 
   # Deploy build to app service
   - task: AzureRmWebAppDeployment@4
