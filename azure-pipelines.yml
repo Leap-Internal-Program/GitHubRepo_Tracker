@@ -53,12 +53,6 @@ steps:
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
 
-    # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
   - task: DotNetCoreCLI@2
     inputs:
       command: 'publish'
@@ -66,6 +60,13 @@ steps:
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
       zipAfterPublish: true
     displayName: 'dotnet publish $(buildConfiguration)'
+
+   # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
+      fileType: 'json'
+      targetFiles: '**/appsettings.json'
 
   - task: PublishBuildArtifacts@1
     inputs:
