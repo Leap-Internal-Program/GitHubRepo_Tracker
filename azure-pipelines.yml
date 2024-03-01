@@ -61,12 +61,15 @@ steps:
       zipAfterPublish: true
     displayName: 'dotnet publish $(buildConfiguration)'
 
+  - script: ls $(Build.ArtifactStagingDirectory)
+    displayName: 'List Contents of Artifact Staging Directory'
+
    # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
+  #- task: FileTransform@1
+   # inputs:
+     # folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor/wwwroot'
+     # fileType: 'json'
+      #targetFiles: '**/appsettings.json'
 
   - task: PublishBuildArtifacts@1
     inputs:
