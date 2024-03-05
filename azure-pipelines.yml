@@ -13,6 +13,14 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  ApiBaseUrl: '$(BaseUrl)'
+  ApiEndpoints.GetAllReposEndpoint: '$(GetAllReposEndpoint)'
+  ApiEndpoints.GetAllTopicsEndpoint: '$(GetAllTopicsEndpoint)'
+  ApiEndpoints.GetAllLanguagesEndpoint: '$(GetAllLanguagesEndpoint)'
+  ApiEndpoints.GetAccessToken: '$(bearertoken)'
+  TokenUserName: '$(Token_UserName)'
+  TokenPassword: '$(Token_Password)'
+
 
 steps:
   # Provision Azure resources
@@ -40,13 +48,7 @@ steps:
     env:
       DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
-  # Configure app service application settings
-  - task: AzureAppServiceSettings@1
-    inputs:
-      azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-      appName: '$(UNIQUE_APP_NAME)'
-      resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-
+      
   # Build projects
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
@@ -58,6 +60,16 @@ steps:
       arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
       zipAfterPublish: true
     displayName: 'dotnet publish $(buildConfiguration)'
+
+  - script: ls $(Build.ArtifactStagingDirectory/$(Build.BuildId).zip)
+    displayName: 'List Contents of Artifact Staging Directory'
+
+   # Overwrite appsettings values
+  - task: FileTransform@1
+    inputs:
+      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor.zip'
+      fileType: 'json'
+      targetFiles: '/**/wwwroot/appsettings.json'
 
   - task: PublishBuildArtifacts@1
     inputs:
