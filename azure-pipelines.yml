@@ -6,13 +6,12 @@
 trigger:
   branches:
     include:
-      - master
-
-pool:
-  vmImage: ubuntu-latest
+      - main
 
 variables:
   buildConfiguration: 'Release'
+  System.Debug: true
+  
   ApiBaseUrl: '$(BaseUrl)'
   ApiEndpoints.GetAllReposEndpoint: '$(GetAllReposEndpoint)'
   ApiEndpoints.GetAllTopicsEndpoint: '$(GetAllTopicsEndpoint)'
@@ -21,66 +20,230 @@ variables:
   TokenUserName: '$(Token_UserName)'
   TokenPassword: '$(Token_Password)'
 
+stages:
+  - stage: DeployAzureResources
+    displayName: 'Provision Azure resources'
 
-steps:
-  # Provision Azure resources
-  - task: AzureResourceManagerTemplateDeployment@3
-    inputs:
-      deploymentScope: 'Resource Group'
-      azureResourceManagerConnection: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-      subscriptionId: '$(AZURE_SUBSCRIPTION_ID)'
-      action: 'Create Or Update Resource Group'
-      resourceGroupName: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-      location: '$(AZURE_RESOURCE_LOCATION)'
-      templateLocation: 'Linked artifact'
-      csmFile: 'rg-deployment.bicep'
-      overrideParameters: |
-        -appServiceName "$(AZURE_FE_APP_SERVICE_NAME)"
-      deploymentMode: 'Incremental'
-      deploymentOutputs: deploymentOutputs
-    displayName: 'Create front-end Azure resources'
+    jobs:
 
-  # Store app service name
-  - bash: |
-      echo "##vso[task.setvariable variable=UNIQUE_APP_NAME; isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.uniqueAppServiceName.value')"
-    name: storeDeploymentOutputs
-    displayName: Save deployment outputs into variables
-    env:
-      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
+      # Deploy API Resources
+    - job: DeployAPIResources
+      displayName: 'Provision API Azure resources'
+      pool:
+        vmImage: windows-latest
+      steps:
 
+      # Provision Azure resources
+      - task: AzureResourceManagerTemplateDeployment@3
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: '$(AZURE_RESOURCE_GROUP_NAME)'
+          subscriptionId: '$(AZURE_SUBSCRIPTION_ID)'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
+          location: '$(AZURE_RESOURCE_LOCATION)'
+          templateLocation: 'Linked artifact'
+          csmFile: 'api-resources.bicep'
+          overrideParameters: |
+            -sqlServerAdminUPN "$(AZURE_APP_REGISTRATION_NAME)" -sqlServerAdminObjectId "$(AZURE_APP_REGISTRATION_CLIENT_ID)"
+          deploymentMode: 'Incremental'
+          deploymentOutputs: deploymentOutputs
+        displayName: 'Create back-end Azure resources'
+
+
+      # Store API app service name
+      - bash: |
+          echo "##vso[task.setvariable variable=serverName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.sqlServerName.value')"
+          echo "##vso[task.setvariable variable=appName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.uniqueApiAppServiceName.value')"
+        name: SaveApiDeploymentOutputs
+        displayName: 'Save deployment outputs into variables'
+        env:
+          DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
+
+
+    - job: DeployFrontendResources
+      displayName: 'Deploy Frontend Resources'
+      pool:
+        vmImage: windows-latest
+      steps:
+        # Provision FrontEnd Azure resources
+      - task: AzureResourceManagerTemplateDeployment@3
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: '$(AZURE_RESOURCE_GROUP_NAME)'
+          subscriptionId: '$(AZURE_SUBSCRIPTION_ID)'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
+          location: '$(AZURE_RESOURCE_LOCATION)'
+          templateLocation: 'Linked artifact'
+          csmFile: 'frontend-resources.bicep'
+          deploymentMode: 'Incremental'
+          deploymentOutputs: frontendDeploymentOutputs
+        displayName: 'Create front-end Azure resources'
+
+
+        # Store app service name
+      - bash: |
+            echo "##vso[task.setvariable variable=uniqueFeAppServiceName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.uniqueFEAppServiceName.value')"
+        name: SaveFeDeploymentOutputs
+        displayName: "Set UNIQUE_FE_APP_NAME from deployment outputs"
+        env:
+            DEPLOYMENT_OUTPUTS: $(frontendDeploymentOutputs)
+
+
+  # Build, test and deploy
+  - stage: BuildAndDeploy
+    displayName: 'Build, Test, and Deploy Apps'
+    dependsOn: DeployAzureResources
+    jobs:
+      - job: BuildTestAndDeployAPI
+        variables:
+          UNIQUE_API_APP_NAME: $[stageDependencies.DeployAzureResources.DeployAPIResources.outputs['SaveApiDeploymentOutputs.appName'] ]
+          SQL_SERVER_NAME: $[stageDependencies.DeployAzureResources.DeployAPIResources.outputs['SaveApiDeploymentOutputs.serverName'] ]
+        displayName: 'Build, Test and Deploy API'
+        pool:
+          vmImage: windows-latest
+        steps:
+
+        # Build API projects
+        - script: dotnet build GitHubRepoTrackerBE/GitHubRepoTrackerBE.csproj --configuration $(buildConfiguration)
+          displayName: 'dotnet build $(buildConfiguration)'
+
+          # Run API Tests
+        - task: DotNetCoreCLI@2
+          displayName: 'Run tests'
+          inputs:
+            command: 'test'
+            projects: 'GitHubRepoTrackerBETest/GitHubRepoTrackerBETest.csproj'
+            arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+
+
+        # Create migration SQL script to configure database
+        - task: DotNetCoreCLI@2
+          displayName: 'Install EntityFrameworkCore'
+          inputs:
+            command: custom
+            custom: tool
+            arguments: 'install --global dotnet-ef --version 8.0.1'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Create migration SQL script'
+          inputs:
+            command: custom
+            custom: ef
+            arguments: 'migrations script -i -p GitHubRepoTrackerBE/GitHubRepoTrackerBE.csproj -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+
+        # Apply migration SQL script to Azure SQL database
+        - task: SqlAzureDacpacDeployment@1
+          inputs:
+            azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+            AuthenticationType: 'servicePrincipal'
+            ServerName: '$(SQL_SERVER_NAME)'
+            DatabaseName: 'GitRepoDB'
+            deployType: 'SqlTask'
+            SqlFile: '$(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+            IpDetectionMethod: 'AutoDetect'
+          displayName: 'Apply migration SQL script to Azure DB'
+
+        - task: PublishBuildArtifacts@1
+          displayName: 'Publish Artifacts'
+          inputs:
+            PathtoPublish: '$(System.ArtifactsDirectory)/Migrations/migration.sql'
+            ArtifactName: '$(artifactName)'
+            publishLocation: 'Container'
+
+        # Configure api app service application settings
+        - task: AzureAppServiceSettings@1
+          inputs:
+            azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+            appName: '$(UNIQUE_API_APP_NAME)'
+            resourceGroupName: '$(AZURE_RESOURCE_GROUP_NAME)'
+            appSettings: |
+              [
+                { "name": "GithubSettings:GitHubAccessToken", "value": "$(GitHubAccessToken)", "slotSetting": false },
+                { "name": "Jwt:Key", "value": "$(JWT_KEY)", "slotSetting": false },
+                { "name": "Jwt:Issuer", "value": "https://localhost:7270", "slotSetting": false },
+                { "name": "Jwt:Audience", "value": "https://localhost:7270", "slotSetting": false },
+                { "name": "Jwt:Subject", "value": "JWT for GitRepositoryTracker", "slotSetting": false },
+                { "name": "GitHubDataFetcherSettings:Size", "value": 2000, "slotSetting": false },
+                { "name": "GitHubDataFetcherSettings:Page", "value": 5, "slotSetting": false },
+                { "name": "GitHubDataFetcherSettings:PerPage", "value": 50, "slotSetting": false },
+                { "name": "GitHubDataFetcherSettings:FetchIntervalInHours", "value": 5, "slotSetting": false },
+                { "name":"Logging__LogLevel__Default", "value":"Information", "slotSetting": false},
+                { "name":"Logging__LogLevel__Microsoft.AspNetCore", "value":"Warning", "slotSetting": false}
+              ]
+
+        # Publish build artifact
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'publish'
+            projects:
+            publishWebProjects: true
+            arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/api'
+            zipAfterPublish: true
+          displayName: 'dotnet publish $(buildConfiguration)'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            targetPath: '$(Build.ArtifactStagingDirectory)/api'
+            artifactName: 'GitRepoTrackerBE'
+
+        # Deploy build to api app service
+        - task: AzureRmWebAppDeployment@4
+          inputs:
+            ConnectionType: 'AzureRM'
+            azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+            appType: 'webApp'
+            WebAppName: '$(UNIQUE_API_APP_NAME)'
+            packageForLinux: '$(Build.ArtifactStagingDirectory)/api/**/*.zip'
       
-  # Build projects
-  - script: dotnet build --configuration $(buildConfiguration)
-    displayName: 'dotnet build $(buildConfiguration)'
+      - job: BuildTestAndDEployFrontEnd
+        variables:
+          UNIQUE_FE_APP_NAME: $[stageDependencies.DeployAzureResources.DeployFrontendResources.outputs['SaveFeDeploymentOutputs.uniqueFeAppServiceName']]
+        displayName: 'Build,Test and Deploy Frontend'
+        pool:
+          vmImage: windows-latest
+        steps:
+        
+            # Build FrontEnd project
+            - script: dotnet build GitHubRepoTrackerFE/GitHubRepoTrackerFE.csproj --configuration $(buildConfiguration)
+              displayName: 'dotnet build $(buildConfiguration)'
 
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'publish'
-      publishWebProjects: true
-      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-      zipAfterPublish: true
-    displayName: 'dotnet publish $(buildConfiguration)'
+            
+            - task: DotNetCoreCLI@2
+              displayName: 'Run tests'
+              inputs:
+                command: 'test'
+                projects: 'GitHubRepoTrackerFETest/GitHubRepoTrackerFETest.csproj'
+                arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
 
-  - script: ls $(Build.ArtifactStagingDirectory/$(Build.BuildId).zip)
-    displayName: 'List Contents of Artifact Staging Directory'
+                
+            - task: DotNetCoreCLI@2
+              inputs:
+                command: 'publish'
+                projects: GitHubRepoTrackerFE/GitHubRepoTrackerFE.csproj
+                publishWebProjects: true
+                arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/frontend'
+                zipAfterPublish: true
+              displayName: 'dotnet publish $(buildConfiguration)'
 
-   # Overwrite appsettings values
-  - task: FileTransform@1
-    inputs:
-      folderPath: '$(Build.ArtifactStagingDirectory)/GitHubRepoTrackerFE_Blazor.zip'
-      fileType: 'json'
-      targetFiles: '/**/wwwroot/appsettings.json'
+            # Overwrite appsettings values
+            - task: FileTransform@1
+              inputs:
+                folderPath: '$(Build.ArtifactStagingDirectory)/frontend/GitHubRepoTrackerFE.zip'
+                fileType: 'json'
+                targetFiles: '/**/wwwroot/appsettings.json'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)'
-      artifactName: 'GitHubRepoTrackerFE_Blazor'
+            - task: PublishBuildArtifacts@1
+              inputs:
+                targetPath: '$(Build.ArtifactStagingDirectory)/frontend'
+                artifactName: 'GitHubRepoTrackerFE'
 
-  # Deploy build to app service
-  - task: AzureRmWebAppDeployment@4
-    inputs:
-      ConnectionType: 'AzureRM'
-      azureSubscription: '$(AZURE_FE_RESOURCE_GROUP_NAME)'
-      appType: 'webApp'
-      WebAppName: '$(UNIQUE_APP_NAME)'
-      packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+            # Deploy build to app service
+            - task: AzureRmWebAppDeployment@4
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: '$(AZURE_RESOURCE_GROUP_NAME)'
+                appType: 'webApp'
+                WebAppName: '$(UNIQUE_FE_APP_NAME)'
+                packageForLinux: '$(Build.ArtifactStagingDirectory)/frontend/**/*.zip'

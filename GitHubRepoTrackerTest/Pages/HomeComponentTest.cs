@@ -1,7 +1,7 @@
 
-using GitHubRepoTrackerFE_Blazor.Interfaces;
-using GitHubRepoTrackerFE_Blazor.Models;
-using GitHubRepoTrackerFE_Blazor.Pages;
+using GitHubRepoTrackerFE.Interfaces;
+using GitHubRepoTrackerFE.Models;
+using GitHubRepoTrackerFE.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 

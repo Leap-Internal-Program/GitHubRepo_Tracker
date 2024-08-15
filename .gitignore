@@ -1,4 +1,6 @@
 ﻿**/bin
 **/obj
+**/appsettings.Development.json
 **/wwwroot/appsettings.Development.json
+GitHubRepoTrackerBE/appsettings.json
 .vs/

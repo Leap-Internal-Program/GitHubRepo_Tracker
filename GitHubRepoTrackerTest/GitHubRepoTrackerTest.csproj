@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GitHubRepoTrackerFE_Blazor\GitHubRepoTrackerFE_Blazor.csproj" />
+    <ProjectReference Include="..\GitHubRepoTrackerFE\GitHubRepoTrackerFE.csproj" />
   </ItemGroup>
 
 </Project>
